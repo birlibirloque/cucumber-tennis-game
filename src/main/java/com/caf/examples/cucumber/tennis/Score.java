@@ -2,53 +2,102 @@ package com.caf.examples.cucumber.tennis;
 
 public class Score {
 	
-	private PointsEnum scoreP1 = PointsEnum.love;
-	private PointsEnum scoreP2 = PointsEnum.love;
+	private PointsEnum scoreService = PointsEnum.love;
+	private PointsEnum scoreRest    = PointsEnum.love;
 	
-	public String getScore() {
-		return correspondingCall();
+	private StateGame state = StateGame.NORMAL;
+	
+	public String getScore() {			
+		return correspondingCall();		
 	}
 
-	public void playerWinPoint(String player) {
-		if (player.equals("Nadal")) 
-			this.scoreP1 = addOnePoint(this.scoreP1, this.scoreP2);
-		else
-			this.scoreP2 = addOnePoint(this.scoreP2, this.scoreP1);
-	}
-
-	private PointsEnum addOnePoint(PointsEnum scoreA, PointsEnum scoreB) {
-		if (scoreA == PointsEnum.deuce)
-		  scoreA = PointsEnum.adv;
-		else if ((scoreA == PointsEnum.adv) || (scoreA == PointsEnum.forty))
-		  scoreA = PointsEnum.game;
-		else if ((scoreA == PointsEnum.therty) && (scoreB == PointsEnum.forty)) {	
-		  scoreA = PointsEnum.deuce;
-      	  scoreB = PointsEnum.deuce;
+	public void serviceWinPoint(){
+		switch (this.state){
+		  case NORMAL:
+			if (this.scoreService == PointsEnum.forty)
+				this.state = StateGame.GAME_S;				
+			else if ((this.scoreRest == PointsEnum.forty) &&
+					 (this.scoreService == PointsEnum.therty)) {
+				this.scoreService = this.scoreService.next();
+				this.state = StateGame.DEUCE;				
+			}
+			else
+				this.scoreService = this.scoreService.next();
+			break;
+		  case DEUCE:
+			this.state = StateGame.ADV_S;
+			break;
+		  case ADV_S:
+			 this.state = StateGame.GAME_S;
+			 break;
+		  case ADV_R:
+			 this.state = StateGame.DEUCE;
+			 break;
 		}
-		else
-		  scoreA = scoreA.next();
-		
-		return scoreA;
+	}	
+	
+	public void restWinPoint(){
+		switch (this.state){
+		  case NORMAL:
+			if (this.scoreRest == PointsEnum.forty)
+				this.state = StateGame.GAME_R;				
+			else if ((this.scoreService == PointsEnum.forty) &&
+					 (this.scoreRest == PointsEnum.therty)) {
+				this.scoreRest = this.scoreRest.next();
+				this.state = StateGame.DEUCE;				
+			}
+			else
+				this.scoreRest = this.scoreRest.next();
+			break;
+		  case DEUCE:
+			this.state = StateGame.ADV_R;
+			break;
+		  case ADV_S:
+			 this.state = StateGame.DEUCE;
+			 break;
+		  case ADV_R:
+			 this.state = StateGame.GAME_R;
+			 break;
+		}
 	}
 	
 	private String correspondingCall(){
 		String msg = "";
-		if (this.scoreP1.equals(this.scoreP2))
-		  msg = this.scoreP1 + "-all";
-		else if ((this.scoreP1.equals(PointsEnum.deuce)) ||
-				 (this.scoreP2.equals(PointsEnum.deuce)))
-		  msg = "deuce";
-		else if ((this.scoreP1.equals(PointsEnum.game)) &&
-				 (this.scoreP2.equals(PointsEnum.love)))
-		  msg = "game love";
-		else if ((this.scoreP2.equals(PointsEnum.game)) &&
-				 (this.scoreP1.equals(PointsEnum.love)))
-		  msg = "game love";
-		else if ((this.scoreP1.equals(PointsEnum.game)) ||
-				 (this.scoreP2.equals(PointsEnum.game)))
-		  msg = "game";
-		else 			
-		  msg = this.scoreP1 + "-" + this.scoreP2;
+		
+		switch (this.state){
+		  case NORMAL:
+			if (this.scoreService.equals(this.scoreRest))
+			  msg = this.scoreService + "-all";
+			else if (this.scoreService == PointsEnum.love)
+			  msg = "love-" + this.scoreRest;
+			else if (this.scoreRest == PointsEnum.love)
+			  msg = this.scoreService + "-love";
+			else 
+			  msg = this.scoreService + "-" + this.scoreRest;
+			break;
+		  case DEUCE:
+			msg = "deuce";
+			break;
+		  case ADV_S:
+			msg = "advantage service";
+			break;
+		  case ADV_R:
+			msg = "advantage rest";
+			break;
+		  case GAME_S:
+			if (this.scoreRest == PointsEnum.love)
+			  msg = "game love service";
+			else
+			  msg = "game service";
+			break;
+		  case GAME_R:
+  		    if (this.scoreService == PointsEnum.love)
+			  msg = "game love rest.";
+			else
+			  msg = "game rest.";
+  		    msg += " Break service";
+			break;
+		}
 		return msg;
 	}
 }

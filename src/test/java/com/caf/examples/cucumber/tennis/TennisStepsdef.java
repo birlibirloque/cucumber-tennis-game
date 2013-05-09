@@ -34,8 +34,13 @@ public class TennisStepsdef {
 		score = tennisGame.howIsScore();
 	}
 
+	@When("^\"([^\"]*)\" is serving$")
+	public void is_serving(String player) {	    
+		tennisGame.setService(player);
+	}
+	
 	@When("^\"([^\"]*)\" win the point$")
-	public void win_the_point(String player) {
+	public void win_the_point(String player) {		
 		tennisGame.setWinnerRace(player);
 	}
 	
