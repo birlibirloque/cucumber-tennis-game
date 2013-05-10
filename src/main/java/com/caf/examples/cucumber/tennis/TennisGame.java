@@ -20,10 +20,7 @@ public class TennisGame {
 	}
 
 	public void setWinnerRace(String player) {
-		if (isServing(player))
-		  this.score.serviceWinPoint();
-		else
-		  this.score.restWinPoint();
+		this.score.winPoint(isServing(player));
 	}
 
 	private boolean isServing(String player) {

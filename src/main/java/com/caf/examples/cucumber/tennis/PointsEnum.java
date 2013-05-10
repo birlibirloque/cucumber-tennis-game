@@ -5,9 +5,8 @@ public enum PointsEnum {
   fifteen, 
   therty,
   forty,
-  deuce,
-  adv,
-  game;  
+  game,
+  adv;
  
   public PointsEnum next() {
       return values()[(ordinal() + 1) % values().length];
